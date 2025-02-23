@@ -1,0 +1,639 @@
+#:kivy 2.1.0
+
+<WelcomeScreen>:
+    BoxLayout:
+        orientation: 'vertical'
+        padding: '20dp'
+        spacing: '20dp'
+
+        Widget:
+            size_hint_y: 0.2
+
+        Image:
+            source: 'assets/robot.png'
+            size_hint: None, None
+            size: '150dp', '150dp'
+            pos_hint: {'center_x': 0.5}
+
+        Label:
+            text: 'Welcome to ECHO AI'
+            font_size: '24sp'
+            color: 1, 1, 1, 1
+            size_hint_y: None
+            height: '40dp'
+            bold: True
+
+        Label:
+            text: 'your friendly AI assistant at hand'
+            font_size: '16sp'
+            color: 1, 1, 1, 0.8
+            size_hint_y: None
+            height: '30dp'
+
+        Widget:
+            size_hint_y: 0.3
+
+        Button:
+            text: 'Continue'
+            size_hint: (1, None)
+            height: '50dp'
+            background_color: (0.16, 0.2, 0.38, 1)
+            background_normal: ''
+            border_radius: [25]
+            on_release: app.root.current = 'login'
+
+        Widget:
+            size_hint_y: 0.2
+
+<LoginScreen>:
+    BoxLayout:
+        orientation: 'vertical'
+        padding: '20dp'
+        spacing: '20dp'
+
+        Widget:
+            size_hint_y: 0.2
+
+        Label:
+            text: 'ECHO AI'
+            font_size: '32sp'
+            color: 1, 1, 1, 1
+            size_hint_y: None
+            height: '60dp'
+            bold: True
+
+        BoxLayout:
+            orientation: 'vertical'
+            spacing: '15dp'
+            size_hint_y: None
+            height: '200dp'
+            padding: [0, 20, 0, 20]
+
+            TextInput:
+                id: email
+                hint_text: 'Email'
+                size_hint: (1, None)
+                height: '45dp'
+                multiline: False
+                padding: [15, 10]
+                background_color: 0.16, 0.2, 0.38, 1
+                foreground_color: 1, 1, 1, 1
+                hint_text_color: 0.6, 0.6, 0.6, 1
+                cursor_color: 1, 1, 1, 1
+
+            TextInput:
+                id: password
+                hint_text: 'Password'
+                size_hint: (1, None)
+                height: '45dp'
+                multiline: False
+                password: True
+                padding: [15, 10]
+                background_color: 0.16, 0.2, 0.38, 1
+                foreground_color: 1, 1, 1, 1
+                hint_text_color: 0.6, 0.6, 0.6, 1
+                cursor_color: 1, 1, 1, 1
+
+            Button:
+                text: 'Log in'
+                size_hint: (1, None)
+                height: '50dp'
+                background_color: 0.16, 0.2, 0.38, 1
+                background_normal: ''
+                on_release: root.do_login(email.text, password.text)
+
+            BoxLayout:
+                orientation: 'horizontal'
+                size_hint_y: None
+                height: '30dp'
+
+                Button:
+                    text: 'Forgot password?'
+                    color: 0.6, 0.6, 1, 1
+                    size_hint_x: 0.5
+                    halign: 'right'
+                    background_color: 0, 0, 0, 0
+                    on_release: root.go_to_forgot_password()
+
+                Button:
+                    text: 'Sign up'
+                    color: 0.6, 0.6, 1, 1
+                    size_hint_x: 0.5
+                    halign: 'left'
+                    background_color: 0, 0, 0, 0
+                    on_release: root.go_to_signup()
+
+        Widget:
+            size_hint_y: 0.3
+
+<NavigationDrawer>:
+    BoxLayout:
+        id: menu_content
+        orientation: 'vertical'
+        padding: '10dp'
+        spacing: '10dp'
+        canvas.before:
+            Color:
+                rgba: 0.16, 0.2, 0.38, 1
+            Rectangle:
+                pos: self.pos
+                size: self.size
+
+        # Üst bar ve kapatma butonu
+        BoxLayout:
+            size_hint_y: None
+            height: '50dp'
+            padding: [10, 0]
+            spacing: '10dp'
+
+            Label:
+                text: '☰ Menu'
+                font_size: '20sp'
+                bold: True
+                color: 1, 1, 1, 1
+                halign: 'left'
+                valign: 'middle'
+                text_size: self.size
+
+            Button:
+                text: '✕'
+                font_size: '20sp'
+                size_hint_x: None
+                width: '40dp'
+                background_color: 0.3, 0.35, 0.5, 1
+                on_release: root.close_menu()
+
+        # Profil bölümü
+        BoxLayout:
+            size_hint_y: None
+            height: '150dp'
+            padding: '20dp'
+            orientation: 'vertical'
+
+            Image:
+                source: 'assets/robot.png'
+                size_hint: None, None
+                size: '80dp', '80dp'
+                pos_hint: {'center_x': 0.5}
+
+            Label:
+                text: 'ECHO AI'
+                font_size: '24sp'
+                bold: True
+                color: 1, 1, 1, 1
+
+        # Menü öğeleri
+        BoxLayout:
+            orientation: 'vertical'
+            spacing: '10dp'
+            padding: '10dp'
+
+            BoxLayout:
+                size_hint_y: None
+                height: '50dp'
+                spacing: '10dp'
+                canvas.before:
+                    Color:
+                        rgba: 0.3, 0.35, 0.5, 1
+                    RoundedRectangle:
+                        pos: self.pos
+                        size: self.size
+                        radius: [10]
+                
+                Label:
+                    text: '+'
+                    font_size: '24sp'
+                    size_hint_x: None
+                    width: '50dp'
+                    color: 1, 1, 1, 1
+                
+                Button:
+                    text: 'New Chat'
+                    color: 1, 1, 1, 1
+                    background_color: 0, 0, 0, 0
+                    halign: 'left'
+                    on_release: 
+                        root.new_chat()
+                        root.dismiss()
+
+            BoxLayout:
+                size_hint_y: None
+                height: '50dp'
+                spacing: '10dp'
+                canvas.before:
+                    Color:
+                        rgba: 0.3, 0.35, 0.5, 1
+                    RoundedRectangle:
+                        pos: self.pos
+                        size: self.size
+                        radius: [10]
+                
+                Label:
+                    text: '👤'
+                    font_size: '24sp'
+                    size_hint_x: None
+                    width: '50dp'
+                    color: 1, 1, 1, 1
+                
+                Button:
+                    text: 'Edit Profile'
+                    color: 1, 1, 1, 1
+                    background_color: 0, 0, 0, 0
+                    halign: 'left'
+                    on_release: root.edit_profile()
+
+            BoxLayout:
+                size_hint_y: None
+                height: '50dp'
+                spacing: '10dp'
+                canvas.before:
+                    Color:
+                        rgba: 0.3, 0.35, 0.5, 1
+                    RoundedRectangle:
+                        pos: self.pos
+                        size: self.size
+                        radius: [10]
+                
+                Label:
+                    text: '🤖'
+                    font_size: '24sp'
+                    size_hint_x: None
+                    width: '50dp'
+                    color: 1, 1, 1, 1
+                
+                Button:
+                    text: 'Change Model'
+                    color: 1, 1, 1, 1
+                    background_color: 0, 0, 0, 0
+                    halign: 'left'
+                    on_release: root.change_model()
+
+            BoxLayout:
+                size_hint_y: None
+                height: '50dp'
+                spacing: '10dp'
+                canvas.before:
+                    Color:
+                        rgba: 0.3, 0.35, 0.5, 1
+                    RoundedRectangle:
+                        pos: self.pos
+                        size: self.size
+                        radius: [10]
+                
+                Label:
+                    text: '🌓'
+                    font_size: '24sp'
+                    size_hint_x: None
+                    width: '50dp'
+                    color: 1, 1, 1, 1
+                
+                Button:
+                    text: 'Light Mode'
+                    color: 1, 1, 1, 1
+                    background_color: 0, 0, 0, 0
+                    halign: 'left'
+                    on_release: root.toggle_theme()
+
+            Widget:
+                size_hint_y: 1
+
+            BoxLayout:
+                size_hint_y: None
+                height: '50dp'
+                spacing: '10dp'
+                canvas.before:
+                    Color:
+                        rgba: 0.3, 0.35, 0.5, 1
+                    RoundedRectangle:
+                        pos: self.pos
+                        size: self.size
+                        radius: [10]
+                
+                Label:
+                    text: '↪️'
+                    font_size: '24sp'
+                    size_hint_x: None
+                    width: '50dp'
+                    color: 1, 1, 1, 1
+                
+                Button:
+                    text: 'Log out'
+                    color: 1, 1, 1, 1
+                    background_color: 0, 0, 0, 0
+                    halign: 'left'
+                    on_release: root.logout()
+
+<ChatScreen>:
+    BoxLayout:
+        orientation: 'vertical'
+        padding: '10dp'
+        spacing: '10dp'
+
+        # Üst bar
+        BoxLayout:
+            size_hint_y: None
+            height: '60dp'
+            padding: [10, 0]
+            spacing: '10dp'
+            canvas.before:
+                Color:
+                    rgba: 0.16, 0.2, 0.38, 1
+                Rectangle:
+                    pos: self.pos
+                    size: self.size
+
+            Button:
+                text: '☰'
+                font_size: '24sp'
+                size_hint_x: None
+                width: '40dp'
+                background_color: 0.3, 0.35, 0.5, 1
+                background_normal: ''
+                on_release: root.toggle_nav_drawer()
+
+            Label:
+                text: 'Chat with ECHO AI'
+                font_size: '24sp'
+                color: 1, 1, 1, 1
+                bold: True
+                halign: 'left'
+                valign: 'middle'
+                text_size: self.size
+
+        # Chat alanı
+        ScrollView:
+            id: chat_scroll
+            do_scroll_x: False
+            
+            BoxLayout:
+                id: chat_history
+                orientation: 'vertical'
+                size_hint_y: None
+                height: self.minimum_height
+                spacing: '15dp'
+                padding: [10, 10]
+
+        # Mesaj gönderme alanı
+        BoxLayout:
+            size_hint_y: None
+            height: '60dp'
+            padding: [10, 5]
+            spacing: '10dp'
+            canvas.before:
+                Color:
+                    rgba: 0.16, 0.2, 0.38, 1
+                RoundedRectangle:
+                    pos: self.pos
+                    size: self.size
+                    radius: [20]
+
+            TextInput:
+                id: message_input
+                hint_text: 'Type your message...'
+                multiline: False
+                padding: [15, 10]
+                background_color: 0, 0, 0, 0
+                foreground_color: 1, 1, 1, 1
+                hint_text_color: 0.6, 0.6, 0.6, 1
+                cursor_color: 1, 1, 1, 1
+                font_size: '16sp'
+                on_text_validate: root.send_message()
+
+            Button:
+                text: 'Send'
+                size_hint_x: None
+                width: '80dp'
+                background_color: 0.3, 0.35, 0.5, 1
+                background_normal: ''
+                on_release: root.send_message()
+
+<SignUpScreen>:
+    BoxLayout:
+        orientation: 'vertical'
+        padding: '20dp'
+        spacing: '20dp'
+
+        Widget:
+            size_hint_y: 0.2
+
+        Label:
+            text: 'Create Account'
+            font_size: '32sp'
+            color: 1, 1, 1, 1
+            size_hint_y: None
+            height: '60dp'
+            bold: True
+
+        BoxLayout:
+            orientation: 'vertical'
+            spacing: '15dp'
+            size_hint_y: None
+            height: '250dp'
+            padding: [0, 20, 0, 20]
+
+            TextInput:
+                id: email
+                hint_text: 'Email'
+                size_hint: (1, None)
+                height: '45dp'
+                multiline: False
+                padding: [15, 10]
+                background_color: 0.16, 0.2, 0.38, 1
+                foreground_color: 1, 1, 1, 1
+                hint_text_color: 0.6, 0.6, 0.6, 1
+                cursor_color: 1, 1, 1, 1
+
+            TextInput:
+                id: password
+                hint_text: 'Password'
+                size_hint: (1, None)
+                height: '45dp'
+                multiline: False
+                password: True
+                padding: [15, 10]
+                background_color: 0.16, 0.2, 0.38, 1
+                foreground_color: 1, 1, 1, 1
+                hint_text_color: 0.6, 0.6, 0.6, 1
+                cursor_color: 1, 1, 1, 1
+
+            TextInput:
+                id: confirm_password
+                hint_text: 'Confirm Password'
+                size_hint: (1, None)
+                height: '45dp'
+                multiline: False
+                password: True
+                padding: [15, 10]
+                background_color: 0.16, 0.2, 0.38, 1
+                foreground_color: 1, 1, 1, 1
+                hint_text_color: 0.6, 0.6, 0.6, 1
+                cursor_color: 1, 1, 1, 1
+
+            Button:
+                text: 'Sign Up'
+                size_hint: (1, None)
+                height: '50dp'
+                background_color: 0.16, 0.2, 0.38, 1
+                background_normal: ''
+                on_release: root.do_signup(email.text, password.text, confirm_password.text)
+
+            Button:
+                text: 'Back to Login'
+                size_hint: (1, None)
+                height: '30dp'
+                background_color: 0, 0, 0, 0
+                color: 0.6, 0.6, 1, 1
+                on_release: app.root.current = 'login'
+
+<ForgotPasswordScreen>:
+    BoxLayout:
+        orientation: 'vertical'
+        padding: '20dp'
+        spacing: '20dp'
+
+        Widget:
+            size_hint_y: 0.2
+
+        Label:
+            text: 'Reset Password'
+            font_size: '32sp'
+            color: 1, 1, 1, 1
+            size_hint_y: None
+            height: '60dp'
+            bold: True
+
+        BoxLayout:
+            orientation: 'vertical'
+            spacing: '15dp'
+            size_hint_y: None
+            height: '200dp'
+            padding: [0, 20, 0, 20]
+
+            Label:
+                text: 'Enter your email to reset your password'
+                color: 0.6, 0.6, 0.6, 1
+                size_hint_y: None
+                height: '30dp'
+
+            TextInput:
+                id: email
+                hint_text: 'Email'
+                size_hint: (1, None)
+                height: '45dp'
+                multiline: False
+                padding: [15, 10]
+                background_color: 0.16, 0.2, 0.38, 1
+                foreground_color: 1, 1, 1, 1
+                hint_text_color: 0.6, 0.6, 0.6, 1
+                cursor_color: 1, 1, 1, 1
+
+            Button:
+                text: 'Reset Password'
+                size_hint: (1, None)
+                height: '50dp'
+                background_color: 0.16, 0.2, 0.38, 1
+                background_normal: ''
+                on_release: root.reset_password(email.text)
+
+            Button:
+                text: 'Back to Login'
+                size_hint: (1, None)
+                height: '30dp'
+                background_color: 0, 0, 0, 0
+                color: 0.6, 0.6, 1, 1
+                on_release: app.root.current = 'login'
+
+<EditProfileScreen>:
+    BoxLayout:
+        orientation: 'vertical'
+        padding: '20dp'
+        spacing: '20dp'
+
+        # Üst bar
+        BoxLayout:
+            size_hint_y: None
+            height: '60dp'
+            padding: [10, 0]
+            spacing: '10dp'
+            canvas.before:
+                Color:
+                    rgba: 0.16, 0.2, 0.38, 1
+                Rectangle:
+                    pos: self.pos
+                    size: self.size
+
+            Button:
+                text: '←'
+                font_size: '24sp'
+                size_hint_x: None
+                width: '40dp'
+                background_color: 0.3, 0.35, 0.5, 1
+                background_normal: ''
+                on_release: app.root.current = 'chat'
+
+            Label:
+                text: 'Edit Profile'
+                font_size: '24sp'
+                color: 1, 1, 1, 1
+                bold: True
+                halign: 'left'
+                valign: 'middle'
+                text_size: self.size
+
+        # Profil düzenleme alanı
+        BoxLayout:
+            orientation: 'vertical'
+            spacing: '15dp'
+            padding: [0, 20, 0, 20]
+
+            Image:
+                source: 'assets/robot.png'
+                size_hint: None, None
+                size: '120dp', '120dp'
+                pos_hint: {'center_x': 0.5}
+
+            Button:
+                text: 'Change Profile Picture'
+                size_hint_x: None
+                width: '200dp'
+                height: '40dp'
+                pos_hint: {'center_x': 0.5}
+                background_color: 0.3, 0.35, 0.5, 1
+                background_normal: ''
+
+            TextInput:
+                id: name
+                hint_text: 'Name'
+                text: root.user_email.split('@')[0] if root.user_email else ''
+                size_hint: (1, None)
+                height: '45dp'
+                multiline: False
+                padding: [15, 10]
+                background_color: 0.16, 0.2, 0.38, 1
+                foreground_color: 1, 1, 1, 1
+                hint_text_color: 0.6, 0.6, 0.6, 1
+                cursor_color: 1, 1, 1, 1
+
+            TextInput:
+                id: email
+                hint_text: 'Email'
+                text: root.user_email
+                size_hint: (1, None)
+                height: '45dp'
+                multiline: False
+                padding: [15, 10]
+                background_color: 0.16, 0.2, 0.38, 1
+                foreground_color: 1, 1, 1, 1
+                hint_text_color: 0.6, 0.6, 0.6, 1
+                cursor_color: 1, 1, 1, 1
+
+            Widget:
+                size_hint_y: 1
+
+            Button:
+                text: 'Save Changes'
+                size_hint: (1, None)
+                height: '50dp'
+                background_color: 0.16, 0.2, 0.38, 1
+                background_normal: ''
+                on_release: root.save_profile(name.text, email.text) 

@@ -1,0 +1,270 @@
+ #:kivy 2.0.0
+#:import utils kivy.utils
+#:import Window kivy.core.window.Window
+#:import Factory kivy.factory.Factory
+#:import get_color_from_hex kivy.utils.get_color_from_hex
+
+<RoundedButton@Button>:
+    background_color: 0,0,0,0
+    canvas.before:
+        Color:
+            rgba: get_color_from_hex('#1A237E') if self.state == 'normal' else get_color_from_hex('#0D47A1')
+        RoundedRectangle:
+            pos: self.pos
+            size: self.size
+            radius: [20]
+    font_size: '16sp'
+    bold: True
+    color: 1, 1, 1, 1
+
+<IconButton>:
+    size_hint: None, None
+    size: dp(40), dp(40)
+    background_color: 0, 0, 0, 0
+    color: 1, 1, 1, 1
+    font_size: '24sp'
+
+<ChatBubble>:
+    orientation: 'vertical'
+    size_hint_y: None
+    height: self.minimum_height
+    padding: dp(10)
+    spacing: dp(5)
+    size_hint_x: 0.7
+    pos_hint: {'right': 0.98} if self.is_user else {'x': 0.02}
+
+    canvas.before:
+        Color:
+            rgba: get_color_from_hex('#1A237E') if self.is_user else get_color_from_hex('#0D47A1')
+        RoundedRectangle:
+            pos: self.pos
+            size: self.size
+            radius: [15, 15, 15 if self.is_user else 0, 0 if self.is_user else 15]
+
+    Label:
+        text: root.text
+        size_hint_y: None
+        height: self.texture_size[1]
+        text_size: self.width, None
+        color: 1, 1, 1, 1
+        padding: dp(10), dp(5)
+        halign: 'left'
+        valign: 'middle'
+
+<LoginScreen>:
+    canvas.before:
+        Color:
+            rgba: get_color_from_hex('#0A1929')
+        Rectangle:
+            pos: self.pos
+            size: self.size
+
+    BoxLayout:
+        orientation: 'vertical'
+        padding: dp(30)
+        spacing: dp(20)
+
+        Image:
+            source: 'assets/astronaut.png'
+            size_hint: None, None
+            size: dp(150), dp(150)
+            pos_hint: {'center_x': 0.5}
+
+        Label:
+            text: 'ECHO AI'
+            font_size: '32sp'
+            size_hint_y: None
+            height: dp(60)
+            color: 1, 1, 1, 1
+            bold: True
+
+        Widget:
+            size_hint_y: 0.1
+
+        BoxLayout:
+            orientation: 'vertical'
+            size_hint_y: None
+            height: dp(50)
+            canvas.before:
+                Color:
+                    rgba: get_color_from_hex('#1A237E')
+                RoundedRectangle:
+                    pos: self.pos
+                    size: self.size
+                    radius: [25]
+            TextInput:
+                id: username_input
+                hint_text: 'Kullanıcı Adı'
+                multiline: False
+                background_color: 0,0,0,0
+                foreground_color: 1,1,1,1
+                cursor_color: 1,1,1,1
+                padding: [15, 15]
+                font_size: '16sp'
+
+        BoxLayout:
+            orientation: 'vertical'
+            size_hint_y: None
+            height: dp(50)
+            canvas.before:
+                Color:
+                    rgba: get_color_from_hex('#1A237E')
+                RoundedRectangle:
+                    pos: self.pos
+                    size: self.size
+                    radius: [25]
+            TextInput:
+                id: password_input
+                hint_text: 'Şifre'
+                multiline: False
+                password: True
+                background_color: 0,0,0,0
+                foreground_color: 1,1,1,1
+                cursor_color: 1,1,1,1
+                padding: [15, 15]
+                font_size: '16sp'
+
+        Label:
+            id: error_label
+            text: ''
+            color: 1, 0, 0, 1
+            size_hint_y: None
+            height: dp(30)
+
+        Widget:
+            size_hint_y: 0.1
+
+        RoundedButton:
+            text: 'Giriş Yap'
+            size_hint_x: 0.8
+            pos_hint: {'center_x': 0.5}
+            on_release: root.verify_credentials()
+
+<ChatScreen>:
+    canvas.before:
+        Color:
+            rgba: get_color_from_hex('#0A1929')
+        Rectangle:
+            pos: self.pos
+            size: self.size
+
+    BoxLayout:
+        orientation: 'vertical'
+        
+        # Header
+        BoxLayout:
+            size_hint_y: None
+            height: dp(60)
+            padding: [dp(10), 0]
+            canvas.before:
+                Color:
+                    rgba: get_color_from_hex('#1A237E')
+                Rectangle:
+                    pos: self.pos
+                    size: self.size
+
+            Label:
+                text: 'Echo AI'
+                font_size: '20sp'
+                bold: True
+                color: 1, 1, 1, 1
+                size_hint_x: 0.9
+
+            BoxLayout:
+                size_hint_x: 0.1
+                IconButton:
+                    text: '⚙️'
+                    on_release: app.show_menu(self)
+
+        # Chat Area
+        ScrollView:
+            id: chat_scroll
+            do_scroll_x: False
+            
+            BoxLayout:
+                id: chat_container
+                orientation: 'vertical'
+                size_hint_y: None
+                height: self.minimum_height
+                padding: dp(10)
+                spacing: dp(10)
+
+        # Input Area
+        BoxLayout:
+            size_hint_y: None
+            height: dp(70)
+            padding: [dp(10), dp(10)]
+            spacing: dp(10)
+            canvas.before:
+                Color:
+                    rgba: get_color_from_hex('#1A237E')
+                Rectangle:
+                    pos: self.pos
+                    size: self.size
+
+            TextInput:
+                id: message_input
+                hint_text: 'Mesajınızı yazın...'
+                hint_text_color: [0.7, 0.7, 0.7, 1]
+                background_color: 0, 0, 0, 0
+                foreground_color: 1, 1, 1, 1
+                cursor_color: 1, 1, 1, 1
+                font_size: '16sp'
+                padding: [15, 15]
+                multiline: False
+                on_text_validate: root.send_message()
+
+            IconButton:
+                text: '➤'
+                on_release: root.send_message()
+
+<ProfileScreen>:
+    canvas.before:
+        Color:
+            rgba: get_color_from_hex('#0A1929')
+        Rectangle:
+            pos: self.pos
+            size: self.size
+
+    BoxLayout:
+        orientation: 'vertical'
+        padding: dp(20)
+        spacing: dp(15)
+
+        BoxLayout:
+            size_hint_y: None
+            height: dp(60)
+            padding: [dp(10), 0]
+            canvas.before:
+                Color:
+                    rgba: get_color_from_hex('#1A237E')
+                Rectangle:
+                    pos: self.pos
+                    size: self.size
+
+            IconButton:
+                text: '←'
+                on_release: app.root.current = 'chat'
+
+            Label:
+                text: 'Profil'
+                font_size: '20sp'
+                bold: True
+                color: 1, 1, 1, 1
+
+        Image:
+            source: 'assets/astronaut.png'
+            size_hint: None, None
+            size: dp(100), dp(100)
+            pos_hint: {'center_x': 0.5}
+
+        Widget:
+            size_hint_y: 0.1
+
+<ScreenManager>:
+    LoginScreen:
+        name: 'login'
+    ChatScreen:
+        name: 'chat'
+    ProfileScreen:
+        name: 'profile'
