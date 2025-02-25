@@ -102,24 +102,21 @@
                 background_normal: ''
                 on_release: root.do_login(email.text, password.text)
 
-            BoxLayout:
-                orientation: 'horizontal'
+            GridLayout:
+                cols: 2
                 size_hint_y: None
                 height: '30dp'
+                spacing: '10dp'
 
                 Button:
                     text: 'Forgot password?'
                     color: 0.6, 0.6, 1, 1
-                    size_hint_x: 0.5
-                    halign: 'right'
                     background_color: 0, 0, 0, 0
                     on_release: root.go_to_forgot_password()
 
                 Button:
                     text: 'Sign up'
                     color: 0.6, 0.6, 1, 1
-                    size_hint_x: 0.5
-                    halign: 'left'
                     background_color: 0, 0, 0, 0
                     on_release: root.go_to_signup()
 
@@ -130,8 +127,8 @@
     BoxLayout:
         id: menu_content
         orientation: 'vertical'
-        padding: '10dp'
-        spacing: '10dp'
+        padding: '15dp'
+        spacing: '15dp'
         canvas.before:
             Color:
                 rgba: 0.16, 0.2, 0.38, 1
@@ -142,13 +139,13 @@
         # Üst bar ve kapatma butonu
         BoxLayout:
             size_hint_y: None
-            height: '50dp'
-            padding: [10, 0]
+            height: '70dp'
+            padding: [20, 10]
             spacing: '10dp'
 
             Label:
-                text: '☰ Menu'
-                font_size: '20sp'
+                text: 'Menu'
+                font_size: '26sp'
                 bold: True
                 color: 1, 1, 1, 1
                 halign: 'left'
@@ -157,11 +154,23 @@
 
             Button:
                 text: '✕'
-                font_size: '20sp'
+                font_size: '30sp'
                 size_hint_x: None
-                width: '40dp'
-                background_color: 0.3, 0.35, 0.5, 1
+                width: '50dp'
+                color: 1, 1, 1, 1
+                background_color: 0, 0, 0, 0
                 on_release: root.close_menu()
+
+        # Ayırıcı çizgi
+        Widget:
+            size_hint_y: None
+            height: '2dp'
+            canvas:
+                Color:
+                    rgba: 0.3, 0.35, 0.5, 1
+                Rectangle:
+                    pos: self.pos
+                    size: self.size
 
         # Profil bölümü
         BoxLayout:
@@ -294,6 +303,34 @@
                     halign: 'left'
                     on_release: root.toggle_theme()
 
+            BoxLayout:
+                size_hint_y: None
+                height: '50dp'
+                spacing: '10dp'
+                canvas.before:
+                    Color:
+                        rgba: 0.3, 0.35, 0.5, 1
+                    RoundedRectangle:
+                        pos: self.pos
+                        size: self.size
+                        radius: [10]
+                
+                Label:
+                    text: '💰'
+                    font_size: '24sp'
+                    size_hint_x: None
+                    width: '50dp'
+                    color: 1, 1, 1, 1
+                
+                Button:
+                    text: 'Buy Credits'
+                    color: 1, 1, 1, 1
+                    background_color: 0, 0, 0, 0
+                    halign: 'left'
+                    on_release: 
+                        app.root.current = 'credit'
+                        root.dismiss()
+
             Widget:
                 size_hint_y: 1
 
@@ -332,9 +369,9 @@
         # Üst bar
         BoxLayout:
             size_hint_y: None
-            height: '60dp'
-            padding: [10, 0]
-            spacing: '10dp'
+            height: '70dp'
+            padding: [15, 0]
+            spacing: '15dp'
             canvas.before:
                 Color:
                     rgba: 0.16, 0.2, 0.38, 1
@@ -344,21 +381,47 @@
 
             Button:
                 text: '☰'
-                font_size: '24sp'
+                font_size: '32sp'
                 size_hint_x: None
-                width: '40dp'
-                background_color: 0.3, 0.35, 0.5, 1
-                background_normal: ''
+                width: '60dp'
+                background_color: 0, 0, 0, 0
+                color: 1, 1, 1, 1
+                bold: True
                 on_release: root.toggle_nav_drawer()
 
             Label:
                 text: 'Chat with ECHO AI'
-                font_size: '24sp'
+                font_size: '26sp'
                 color: 1, 1, 1, 1
                 bold: True
                 halign: 'left'
                 valign: 'middle'
                 text_size: self.size
+
+            # Kredi göstergesi
+            BoxLayout:
+                size_hint_x: None
+                width: '120dp'
+                padding: [5, 5]
+                canvas.before:
+                    Color:
+                        rgba: 0.3, 0.35, 0.5, 1
+                    RoundedRectangle:
+                        pos: self.pos
+                        size: self.size
+                        radius: [15]
+
+                Label:
+                    text: '💰'
+                    font_size: '20sp'
+                    size_hint_x: None
+                    width: '30dp'
+
+                Label:
+                    text: str(root.credits)
+                    font_size: '18sp'
+                    bold: True
+                    color: 1, 1, 1, 1
 
         # Chat alanı
         ScrollView:
@@ -636,4 +699,162 @@
                 height: '50dp'
                 background_color: 0.16, 0.2, 0.38, 1
                 background_normal: ''
-                on_release: root.save_profile(name.text, email.text) 
+                on_release: root.save_profile(name.text, email.text)
+
+<CreditScreen>:
+    BoxLayout:
+        orientation: 'vertical'
+        padding: '20dp'
+        spacing: '20dp'
+
+        # Üst bar
+        BoxLayout:
+            size_hint_y: None
+            height: '60dp'
+            padding: [10, 0]
+            spacing: '10dp'
+            canvas.before:
+                Color:
+                    rgba: 0.16, 0.2, 0.38, 1
+                Rectangle:
+                    pos: self.pos
+                    size: self.size
+
+            Button:
+                text: '←'
+                font_size: '24sp'
+                size_hint_x: None
+                width: '40dp'
+                background_color: 0.3, 0.35, 0.5, 1
+                background_normal: ''
+                on_release: app.root.current = 'chat'
+
+            Label:
+                text: 'Buy Credits'
+                font_size: '24sp'
+                color: 1, 1, 1, 1
+                bold: True
+                halign: 'left'
+                valign: 'middle'
+                text_size: self.size
+
+        # Kredi paketleri
+        GridLayout:
+            cols: 2
+            spacing: '15dp'
+            padding: [0, 20, 0, 20]
+
+            # 100 Kredi Paketi
+            BoxLayout:
+                orientation: 'vertical'
+                padding: '15dp'
+                spacing: '10dp'
+                canvas.before:
+                    Color:
+                        rgba: 0.3, 0.35, 0.5, 1
+                    RoundedRectangle:
+                        pos: self.pos
+                        size: self.size
+                        radius: [15]
+
+                Label:
+                    text: '100 Credits'
+                    font_size: '20sp'
+                    bold: True
+
+                Label:
+                    text: '₺50'
+                    font_size: '18sp'
+
+                Button:
+                    text: 'Buy Now'
+                    size_hint_y: None
+                    height: '40dp'
+                    background_color: 0.16, 0.2, 0.38, 1
+                    on_release: root.buy_credits(100)
+
+            # 500 Kredi Paketi
+            BoxLayout:
+                orientation: 'vertical'
+                padding: '15dp'
+                spacing: '10dp'
+                canvas.before:
+                    Color:
+                        rgba: 0.3, 0.35, 0.5, 1
+                    RoundedRectangle:
+                        pos: self.pos
+                        size: self.size
+                        radius: [15]
+
+                Label:
+                    text: '500 Credits'
+                    font_size: '20sp'
+                    bold: True
+
+                Label:
+                    text: '₺200'
+                    font_size: '18sp'
+
+                Button:
+                    text: 'Buy Now'
+                    size_hint_y: None
+                    height: '40dp'
+                    background_color: 0.16, 0.2, 0.38, 1
+                    on_release: root.buy_credits(500)
+
+<PaymentModal>:
+    BoxLayout:
+        orientation: 'vertical'
+        padding: '20dp'
+        spacing: '15dp'
+
+        Label:
+            text: 'Payment Details'
+            font_size: '24sp'
+            bold: True
+            size_hint_y: None
+            height: '40dp'
+
+        TextInput:
+            id: card_number
+            hint_text: 'Card Number'
+            size_hint_y: None
+            height: '40dp'
+            multiline: False
+            input_filter: 'int'
+            max_length: 16
+
+        BoxLayout:
+            size_hint_y: None
+            height: '40dp'
+            spacing: '10dp'
+
+            TextInput:
+                id: expiry
+                hint_text: 'MM/YY'
+                size_hint_x: 0.7
+                multiline: False
+                max_length: 5
+
+            TextInput:
+                id: cvv
+                hint_text: 'CVV'
+                size_hint_x: 0.3
+                multiline: False
+                password: True
+                input_filter: 'int'
+                max_length: 3
+
+        Button:
+            text: 'Pay Now'
+            size_hint_y: None
+            height: '50dp'
+            background_color: 0.16, 0.2, 0.38, 1
+            on_release: root.process_payment(card_number.text, expiry.text, cvv.text)
+
+        Button:
+            text: 'Cancel'
+            size_hint_y: None
+            height: '50dp'
+            background_color: 0.3, 0.35, 0.5, 1
+            on_release: root.dismiss() 

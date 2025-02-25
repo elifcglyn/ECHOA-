@@ -4,7 +4,7 @@ from kivy.lang import Builder
 from kivy.core.window import Window
 from kivy.uix.label import Label
 from kivy.clock import Clock
-from kivy.properties import ObjectProperty, StringProperty
+from kivy.properties import ObjectProperty, StringProperty, NumericProperty
 from kivy.metrics import dp
 from kivy.uix.boxlayout import BoxLayout
 from kivy.graphics import Color, RoundedRectangle
@@ -13,6 +13,9 @@ from kivy.uix.modalview import ModalView
 from kivy.core.text import LabelBase
 from kivy.resources import resource_add_path
 from kivy.uix.button import Button
+import openai
+from kivy.clock import mainthread
+from openai import OpenAI
 
 # Kivy dosyasını yükle
 Builder.load_file('echoai.kv')
@@ -120,12 +123,14 @@ class NavigationDrawer(ModalView):
     def on_touch_down(self, touch):
         # Menü dışına tıklandığında kapat
         if not self.collide_point(*touch.pos):
-            self.dismiss()
+            if self.parent:
+                self.parent.remove_widget(self)
             return True
         return super().on_touch_down(touch)
 
     def close_menu(self, *args):
-        self.dismiss()
+        if self.parent:
+            self.parent.remove_widget(self)
 
     def new_chat(self):
         chat_screen = App.get_running_app().root.get_screen('chat')
@@ -177,7 +182,51 @@ class ChatScreen(Screen):
     message_input = ObjectProperty(None)
     user_email = StringProperty("")
     nav_drawer = None
-    current_model = StringProperty("ECHO Basic")
+    current_model = StringProperty("GPT-3.5")
+    credits = NumericProperty(100)  # Başlangıç kredisi
+    
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        # OpenAI istemcisini oluştur
+        self.client = OpenAI(
+            api_key="sk-..."  # OpenAI API anahtarınızı buraya yazın
+        )
+        
+        # Sohbet geçmişi için liste
+        self.messages = [
+            {"role": "system", "content": "Sen yardımcı bir AI asistanısın. Türkçe konuşuyorsun."}
+        ]
+        
+        # Önceden tanımlanmış yanıtlar
+        self.quick_responses = {
+            "merhaba": "Merhaba! Size nasıl yardımcı olabilirim?",
+            "selam": "Selam! Bugün size nasıl yardımcı olabilirim?",
+            "nasılsın": "İyiyim, teşekkür ederim! Siz nasılsınız?",
+            "teşekkürler": "Rica ederim! Başka bir konuda yardıma ihtiyacınız var mı?",
+            "görüşürüz": "Görüşmek üzere! İyi günler dilerim.",
+            "yardım": """Size şu konularda yardımcı olabilirim:
+- Sorularınızı yanıtlama
+- Kod yazma ve düzeltme
+- Metin düzenleme ve yazma
+- Matematik problemleri çözme
+- Genel bilgi ve tavsiye verme""",
+            "ne yapabilirsin": """Yapabileceklerimden bazıları:
+1. Programlama ve kodlama yardımı
+2. Matematik ve fen soruları
+3. Metin yazma ve düzenleme
+4. Araştırma ve analiz
+5. Yaratıcı yazım ve beyin fırtınası
+6. Dil öğrenme desteği
+7. Genel bilgi ve tavsiyeler""",
+        }
+        
+        # Model başına kredi maliyeti
+        self.model_costs = {
+            "GPT-3.5": 1,    # Her mesaj 1 kredi
+            "GPT-4": 5,      # Her mesaj 5 kredi
+            "Claude": 3,      # Her mesaj 3 kredi
+            "ECHO Basic": 0   # Ücretsiz
+        }
 
     def on_enter(self):
         # Yeni bir NavigationDrawer oluştur
@@ -193,16 +242,91 @@ class ChatScreen(Screen):
         
         # Eğer menü açıksa kapat, kapalıysa aç
         if self.nav_drawer.parent:
-            self.nav_drawer.dismiss()
+            self.remove_widget(self.nav_drawer)
         else:
             self.add_widget(self.nav_drawer)
+
+    def on_leave(self):
+        # Ekrandan çıkarken menüyü kapat
+        if self.nav_drawer and self.nav_drawer.parent:
+            self.remove_widget(self.nav_drawer)
 
     def send_message(self):
         message = self.ids.message_input.text.strip()
         if message:
+            # Kullanıcı mesajını ekrana ekle
             self.add_message(message, True)
             self.ids.message_input.text = ''
-            Clock.schedule_once(lambda dt: self.ai_response(message), 1)
+            
+            # Mesajı geçmişe ekle
+            self.messages.append({"role": "user", "content": message})
+            
+            # Yazıyor... göster
+            self.show_typing()
+            
+            # AI yanıtını al
+            Clock.schedule_once(lambda dt: self.get_ai_response(), 1)
+
+    def show_typing(self):
+        typing_bubble = MessageBubble(text="Yazıyor...", is_user=False)
+        self.ids.chat_history.add_widget(typing_bubble)
+        self.typing_bubble = typing_bubble
+        self.scroll_to_bottom()
+
+    def get_ai_response(self):
+        try:
+            # Kredi kontrolü
+            cost = self.model_costs.get(self.current_model, 1)
+            if self.credits < cost:
+                if hasattr(self, 'typing_bubble'):
+                    self.ids.chat_history.remove_widget(self.typing_bubble)
+                self.add_message("Üzgünüm, yeterli krediniz kalmadı. Lütfen kredi yükleyin.", False)
+                return
+
+            # Hızlı yanıtlar için kredi düşülmez
+            user_message = self.messages[-1]["content"].lower()
+            for key, response in self.quick_responses.items():
+                if key in user_message:
+                    if hasattr(self, 'typing_bubble'):
+                        self.ids.chat_history.remove_widget(self.typing_bubble)
+                    self.add_message(response, False)
+                    return
+
+            # API çağrısı
+            try:
+                response = self.client.chat.completions.create(
+                    model="gpt-3.5-turbo",
+                    messages=self.messages,
+                    temperature=0.7,
+                    max_tokens=1000
+                )
+                
+                # API çağrısı başarılıysa krediyi düş
+                self.credits -= cost
+                
+                # Kullanılan krediyi göster
+                self.add_message(f"💰 {cost} kredi kullanıldı. Kalan: {self.credits}", False)
+                
+                # Yanıtı göster
+                if hasattr(self, 'typing_bubble'):
+                    self.ids.chat_history.remove_widget(self.typing_bubble)
+                ai_message = response.choices[0].message.content
+                self.messages.append({"role": "assistant", "content": ai_message})
+                self.add_message(ai_message, False)
+                
+                # Kredi uyarısı
+                if self.credits < 10:
+                    self.add_message(f"⚠️ Uyarı: Sadece {self.credits} krediniz kaldı!", False)
+                
+            except Exception as e:
+                raise e
+
+        except Exception as e:
+            if hasattr(self, 'typing_bubble'):
+                self.ids.chat_history.remove_widget(self.typing_bubble)
+            error_msg = f"API Hatası: {str(e)}"
+            print(error_msg)
+            self.add_message("Üzgünüm, bir hata oluştu. Lütfen tekrar deneyin.", False)
 
     def add_message(self, text, is_user=True):
         bubble = MessageBubble(text=text, is_user=is_user)
@@ -216,31 +340,18 @@ class ChatScreen(Screen):
     def clear_and_start_new_chat(self):
         # Sohbet geçmişini temizle
         self.ids.chat_history.clear_widgets()
+        # Mesaj listesini sıfırla
+        self.messages = [
+            {"role": "system", "content": "Sen yardımcı bir AI asistanısın. Türkçe konuşuyorsun."}
+        ]
         # Yeni sohbet başlangıç mesajı
         welcome_msg = f"Yeni sohbet başlatıldı. Size nasıl yardımcı olabilirim?"
         Clock.schedule_once(lambda dt: self.add_message(welcome_msg, False), 0.5)
 
-    def ai_response(self, user_message):
-        model_prefix = f"[{self.current_model}] "
-        responses = {
-            "merhaba": "Merhaba! Nasıl yardımcı olabilirim?",
-            "nasılsın": "İyiyim, teşekkür ederim! Size nasıl yardımcı olabilirim?",
-            "görüşürüz": "Görüşmek üzere! İyi günler!",
-            "selam": "Selam! Bugün size nasıl yardımcı olabilirim?",
-            "teşekkür": "Rica ederim! Başka bir konuda yardıma ihtiyacınız var mı?",
-            "yardım": "Size hangi konuda yardımcı olabilirim?",
-            "ne yapabilirsin": "Size çeşitli konularda yardımcı olabilirim:\n- Sorularınızı yanıtlayabilirim\n- Bilgi verebilirim\n- Önerilerde bulunabilirim",
-            "kimsin": f"Ben ECHO AI ({self.current_model}), size yardımcı olmak için tasarlanmış bir yapay zeka asistanıyım.",
-            "model": f"Şu anda {self.current_model} modelini kullanıyorum.",
-        }
-        
-        response = "Anlıyorum. Size başka nasıl yardımcı olabilirim?"
-        for key in responses:
-            if key in user_message.lower():
-                response = responses[key]
-                break
-                
-        self.add_message(model_prefix + response, False)
+    def change_model(self, model_name):
+        self.current_model = model_name
+        cost = self.model_costs.get(model_name, 1)
+        self.add_message(f"Model değiştirildi: {model_name} (Her mesaj {cost} kredi)", False)
 
 class SignUpScreen(Screen):
     def do_signup(self, email, password, confirm_password):
@@ -256,6 +367,35 @@ class ForgotPasswordScreen(Screen):
             # Şifre sıfırlama emaili gönderildi varsayalım
             self.manager.current = 'login'
 
+class CreditScreen(Screen):
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.credits = 0
+    
+    def buy_credits(self, amount):
+        # Burada ödeme işlemi yapılacak
+        self.show_payment_modal(amount)
+    
+    def show_payment_modal(self, amount):
+        payment_modal = PaymentModal(amount=amount)
+        payment_modal.open()
+
+class PaymentModal(ModalView):
+    def __init__(self, amount, **kwargs):
+        super().__init__(**kwargs)
+        self.amount = amount
+        self.size_hint = (0.8, 0.6)
+        self.background_color = (0.16, 0.2, 0.38, 0.97)
+
+    def process_payment(self, card_number, expiry, cvv):
+        # Burada gerçek ödeme işlemi yapılacak
+        if len(card_number) == 16 and len(expiry) == 5 and len(cvv) == 3:
+            # Başarılı ödeme simülasyonu
+            chat_screen = App.get_running_app().root.get_screen('chat')
+            chat_screen.add_message(f"{self.amount} kredi başarıyla yüklendi!", False)
+            self.dismiss()
+            App.get_running_app().root.current = 'chat'
+
 class EchoAIApp(App):
     def build(self):
         sm = ScreenManager()
@@ -265,6 +405,7 @@ class EchoAIApp(App):
         sm.add_widget(SignUpScreen(name='signup'))
         sm.add_widget(ForgotPasswordScreen(name='forgot'))
         sm.add_widget(EditProfileScreen(name='edit_profile'))
+        sm.add_widget(CreditScreen(name='credit'))  # Yeni ekran
         return sm
 
 if __name__ == '__main__':
