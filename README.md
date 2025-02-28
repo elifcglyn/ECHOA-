@@ -1,5 +1,6 @@
-# Kredi Sistemi ile LLM Sohbet Uygulaması
 
+# Kredi Sistemi ile LLM Sohbet Uygulaması
+#BU BİR EKİP ÇALIŞMASIDIR
 ## Proje Açıklaması
 Bu proje, kullanıcıların kayıt olup giriş yapabildiği, kredi bakiyesini kullanarak sohbet edebildiği ve farklı LLM modelleri arasından seçim yapabildiği bir mobil sohbet uygulamasıdır. Kullanıcılar belirli bir kredi karşılığında mesaj gönderebilir ve ek kredi satın alabilir.
 
